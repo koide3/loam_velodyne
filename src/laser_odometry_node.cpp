@@ -9,7 +9,7 @@ int main(int argc, char **argv)
   ros::NodeHandle node;
   ros::NodeHandle privateNode("~");
 
-  loam::LaserOdometry laserOdom(0.1);
+  loam::LaserOdometry laserOdom(privateNode, 0.1);
 
   if (laserOdom.setup(node, privateNode)) {
     // initialization successful

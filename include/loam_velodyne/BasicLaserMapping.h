@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 // Copyright 2013, Ji Zhang, Carnegie Mellon University
 // Further contributions copyright (c) 2016, Southwest Research Institute
 // All rights reserved.
@@ -40,6 +40,8 @@
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
 
+#include <ros/ros.h>
+
 namespace loam
 {
 
@@ -77,7 +79,7 @@ typedef struct IMUState2
 class BasicLaserMapping
 {
 public:
-   explicit BasicLaserMapping(const float& scanPeriod = 0.1, const size_t& maxIterations = 10);
+   explicit BasicLaserMapping(ros::NodeHandle& privateNode, const float& scanPeriod = 0.1, const size_t& maxIterations = 10);
 
    /** \brief Try to process buffered data. */
    bool process(Time const& laserOdometryTime);
@@ -127,6 +129,7 @@ private:
    { return i + _laserCloudWidth * j + _laserCloudWidth * _laserCloudHeight * k; }
 
 private:
+   ros::NodeHandle& _privateNode;
    Time _laserOdometryTime;
 
    float _scanPeriod;          ///< time per scan

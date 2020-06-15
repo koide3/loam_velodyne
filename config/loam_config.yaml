@@ -1,0 +1,15 @@
+laserOdometry:
+  ioRatio: 2
+  maxIterations: 25
+  minLastCornerCloudSize: 10
+  minLastSurfaceCloudSize: 100
+  maxPointSearchSqDis: 25
+  minPointSelNum: 10
+
+laserMapping:
+  maxIterations: 10
+  mapFrameNum: 5
+  downsamplingCorner: 0.2
+  downsamplingSurf: 0.4
+  cubeSize: 50.0
+

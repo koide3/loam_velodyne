@@ -54,7 +54,7 @@ namespace loam
 class LaserMapping : public BasicLaserMapping
 {
 public:
-   explicit LaserMapping(const float& scanPeriod = 0.1, const size_t& maxIterations = 10);
+   explicit LaserMapping(ros::NodeHandle& privateNode, const float& scanPeriod = 0.1, const size_t& maxIterations = 10);
 
    /** \brief Setup component in active mode.
     *

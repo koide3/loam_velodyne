@@ -36,7 +36,8 @@
 namespace loam
 {
 
-LaserMapping::LaserMapping(const float& scanPeriod, const size_t& maxIterations)
+LaserMapping::LaserMapping(ros::NodeHandle& privateNode, const float& scanPeriod, const size_t& maxIterations)
+: BasicLaserMapping(privateNode)
 {
    // initialize mapping odometry and odometry tf messages
    _odomAftMapped.header.frame_id = "/camera_init";

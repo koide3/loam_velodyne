@@ -4,6 +4,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
+#include <ros/ros.h>
+
 namespace loam
 {
 
@@ -13,7 +15,7 @@ namespace loam
   class BasicLaserOdometry
   {
   public:
-    explicit BasicLaserOdometry(float scanPeriod = 0.1, size_t maxIterations = 25);
+    explicit BasicLaserOdometry(ros::NodeHandle& privateNode, float scanPeriod = 0.1, size_t maxIterations = 25);
 
     /** \brief Try to process buffered data. */
     void process();
@@ -66,6 +68,8 @@ namespace loam
                             Angle &ox, Angle &oy, Angle &oz);
 
   private:
+    ros::NodeHandle& _privateNode;
+
     float _scanPeriod;       ///< time per scan
     long _frameCount;        ///< number of processed frames
     size_t _maxIterations;   ///< maximum number of iterations

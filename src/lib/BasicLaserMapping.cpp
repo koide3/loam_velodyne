@@ -48,10 +48,11 @@ using std::atan2;
 using std::pow;
 
 
-BasicLaserMapping::BasicLaserMapping(const float& scanPeriod, const size_t& maxIterations) :
+BasicLaserMapping::BasicLaserMapping(ros::NodeHandle& privateNode, const float& scanPeriod, const size_t& maxIterations) :
+   _privateNode(privateNode),
    _scanPeriod(scanPeriod),
    _stackFrameNum(1),
-   _mapFrameNum(5),
+   _mapFrameNum(_privateNode.param<int>("mapFrameNum", 5)),
    _frameCount(0),
    _mapFrameCount(0),
    _maxIterations(maxIterations),
@@ -95,8 +96,10 @@ BasicLaserMapping::BasicLaserMapping(const float& scanPeriod, const size_t& maxI
    }
 
    // setup down size filters
-   _downSizeFilterCorner.setLeafSize(0.2, 0.2, 0.2);
-   _downSizeFilterSurf.setLeafSize(0.4, 0.4, 0.4);
+   double cornerResolution = _privateNode.param<double>("downsamplingCorner", 0.2);
+   double surfResolution = _privateNode.param<double>("downsamplingSurf", 0.4);
+   _downSizeFilterCorner.setLeafSize(cornerResolution, cornerResolution, cornerResolution);
+   _downSizeFilterSurf.setLeafSize(surfResolution, surfResolution, surfResolution);
 }
 
 
@@ -297,7 +300,7 @@ bool BasicLaserMapping::process(Time const& laserOdometryTime)
    pointOnYAxis.z = 0.0;
    pointAssociateToMap(pointOnYAxis, pointOnYAxis);
 
-   auto const CUBE_SIZE = 50.0;
+   double CUBE_SIZE = _privateNode.param<double>("cubeSize", 50.0);
    auto const CUBE_HALF = CUBE_SIZE / 2;
 
    int centerCubeI = int((_transformTobeMapped.pos.x() + CUBE_HALF) / CUBE_SIZE) + _laserCloudCenWidth;

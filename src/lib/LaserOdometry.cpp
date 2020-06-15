@@ -48,8 +48,8 @@ namespace loam
   using std::pow;
 
 
-  LaserOdometry::LaserOdometry(float scanPeriod, uint16_t ioRatio, size_t maxIterations):
-    BasicLaserOdometry(scanPeriod, maxIterations),
+  LaserOdometry::LaserOdometry(ros::NodeHandle& privateNode, float scanPeriod, uint16_t ioRatio, size_t maxIterations):
+    BasicLaserOdometry(privateNode, scanPeriod, maxIterations),
     _ioRatio(ioRatio)
   {
     // initialize odometry and odometry tf messages
