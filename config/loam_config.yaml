@@ -3,13 +3,16 @@ laserOdometry:
   maxIterations: 25
   minLastCornerCloudSize: 10
   minLastSurfaceCloudSize: 100
-  maxPointSearchSqDis: 25
+  maxPointSearchSqDis: 10
   minPointSelNum: 10
 
 laserMapping:
   maxIterations: 10
   mapFrameNum: 5
-  downsamplingCorner: 0.2
-  downsamplingSurf: 0.4
-  cubeSize: 50.0
+  cornerFilterSize: 0.2
+  surfaceFilterSize: 0.4
+  cubeSize: 250.0
+  laserCloudCenWidth: 10
+  laserCloudCenHeight: 5
+  laserCloudCenDepth: 10
 

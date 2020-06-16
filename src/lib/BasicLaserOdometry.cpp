@@ -222,7 +222,12 @@ void BasicLaserOdometry::process()
    size_t lastCornerCloudSize = _lastCornerCloud->points.size();
    size_t lastSurfaceCloudSize = _lastSurfaceCloud->points.size();
 
-   if (lastCornerCloudSize > _privateNode.param<int>("minLastCornerCloudSize", 10) && lastSurfaceCloudSize > _privateNode.param<int>("minLastSurfaceCloudSize", 100))
+   int minLastCornerCloudSize = _privateNode.param<int>("minLastCornerCloudSize", 10);
+   int minLastSurfaceCloudSize = _privateNode.param<int>("minLastSurfaceCloudSize", 100);
+   double maxPointSearchSqDis = _privateNode.param<double>("maxPointSearchSqDis", 25);
+   int minPointSelNum = _privateNode.param<double>("minPointSelNum", 10);
+
+   if (lastCornerCloudSize > minLastCornerCloudSize && lastSurfaceCloudSize > minLastSurfaceCloudSize)
    {
       std::vector<int> pointSearchInd(1);
       std::vector<float> pointSearchSqDis(1);
@@ -254,12 +259,12 @@ void BasicLaserOdometry::process()
                _lastCornerKDTree.nearestKSearch(pointSel, 1, pointSearchInd, pointSearchSqDis);
 
                int closestPointInd = -1, minPointInd2 = -1;
-               if (pointSearchSqDis[0] < _privateNode.param<double>("maxPointSearchSqDis", 25))
+               if (pointSearchSqDis[0] < maxPointSearchSqDis)
                {
                   closestPointInd = pointSearchInd[0];
                   int closestPointScan = int(_lastCornerCloud->points[closestPointInd].intensity);
 
-                  float pointSqDis, minPointSqDis2 = _privateNode.param<double>("maxPointSearchSqDis", 25);
+                  float pointSqDis, minPointSqDis2 = maxPointSearchSqDis;
                   for (int j = closestPointInd + 1; j < cornerPointsSharpNum; j++)
                   {
                      if (int(_lastCornerCloud->points[j].intensity) > closestPointScan + 2.5)
@@ -370,12 +375,12 @@ void BasicLaserOdometry::process()
             {
                _lastSurfaceKDTree.nearestKSearch(pointSel, 1, pointSearchInd, pointSearchSqDis);
                int closestPointInd = -1, minPointInd2 = -1, minPointInd3 = -1;
-               if (pointSearchSqDis[0] < _privateNode.param<double>("maxPointSearchSqDis", 25))
+               if (pointSearchSqDis[0] < maxPointSearchSqDis)
                {
                   closestPointInd = pointSearchInd[0];
                   int closestPointScan = int(_lastSurfaceCloud->points[closestPointInd].intensity);
 
-                  float pointSqDis, minPointSqDis2 = _privateNode.param<double>("maxPointSearchSqDis", 25), minPointSqDis3 = _privateNode.param<double>("maxPointSearchSqDis", 25);
+                  float pointSqDis, minPointSqDis2 = maxPointSearchSqDis, minPointSqDis3 = maxPointSearchSqDis;
                   for (int j = closestPointInd + 1; j < surfPointsFlatNum; j++)
                   {
                      if (int(_lastSurfaceCloud->points[j].intensity) > closestPointScan + 2.5)
@@ -483,7 +488,7 @@ void BasicLaserOdometry::process()
          }
 
          int pointSelNum = _laserCloudOri->points.size();
-         if (pointSelNum < _privateNode.param<double>("minPointSelNum", 10))
+         if (pointSelNum < minPointSelNum)
          {
             continue;
          }
@@ -658,7 +663,7 @@ void BasicLaserOdometry::process()
    lastCornerCloudSize = _lastCornerCloud->points.size();
    lastSurfaceCloudSize = _lastSurfaceCloud->points.size();
 
-   if (lastCornerCloudSize > _privateNode.param<double>("minLastCornerCloudSize", 10) && lastSurfaceCloudSize > _privateNode.param<double>("minLastSurfaceCloudSize", 100))
+   if (lastCornerCloudSize > minLastCornerCloudSize && lastSurfaceCloudSize > minLastSurfaceCloudSize)
    {
       _lastCornerKDTree.setInputCloud(_lastCornerCloud);
       _lastSurfaceKDTree.setInputCloud(_lastSurfaceCloud);

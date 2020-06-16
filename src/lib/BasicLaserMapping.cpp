@@ -58,12 +58,12 @@ BasicLaserMapping::BasicLaserMapping(ros::NodeHandle& privateNode, const float& 
    _maxIterations(maxIterations),
    _deltaTAbort(0.05),
    _deltaRAbort(0.05),
-   _laserCloudCenWidth(10),
-   _laserCloudCenHeight(5),
-   _laserCloudCenDepth(10),
-   _laserCloudWidth(21),
-   _laserCloudHeight(11),
-   _laserCloudDepth(21),
+   _laserCloudCenWidth(_privateNode.param<int>("laserCloudCenWidth", 10)),
+   _laserCloudCenHeight(_privateNode.param<int>("laserCloudCenHeight", 5)),
+   _laserCloudCenDepth(_privateNode.param<int>("laserCloudCenDepth", 10)),
+   _laserCloudWidth(_laserCloudCenWidth * 2 + 1),
+   _laserCloudHeight(_laserCloudCenHeight * 2 + 1),
+   _laserCloudDepth(_laserCloudCenDepth * 2 + 1),
    _laserCloudNum(_laserCloudWidth * _laserCloudHeight * _laserCloudDepth),
    _laserCloudCornerLast(new pcl::PointCloud<pcl::PointXYZI>()),
    _laserCloudSurfLast(new pcl::PointCloud<pcl::PointXYZI>()),
@@ -96,10 +96,8 @@ BasicLaserMapping::BasicLaserMapping(ros::NodeHandle& privateNode, const float& 
    }
 
    // setup down size filters
-   double cornerResolution = _privateNode.param<double>("downsamplingCorner", 0.2);
-   double surfResolution = _privateNode.param<double>("downsamplingSurf", 0.4);
-   _downSizeFilterCorner.setLeafSize(cornerResolution, cornerResolution, cornerResolution);
-   _downSizeFilterSurf.setLeafSize(surfResolution, surfResolution, surfResolution);
+   _downSizeFilterCorner.setLeafSize(0.2, 0.2, 0.2);
+   _downSizeFilterSurf.setLeafSize(0.4, 0.4, 0.4);
 }
 
 
@@ -456,9 +454,9 @@ bool BasicLaserMapping::process(Time const& laserOdometryTime)
                 k >= 0 && k < _laserCloudDepth)
             {
 
-               float centerX = 50.0f * (i - _laserCloudCenWidth);
-               float centerY = 50.0f * (j - _laserCloudCenHeight);
-               float centerZ = 50.0f * (k - _laserCloudCenDepth);
+               float centerX = CUBE_SIZE * (i - _laserCloudCenWidth);
+               float centerY = CUBE_SIZE * (j - _laserCloudCenHeight);
+               float centerZ = CUBE_SIZE * (k - _laserCloudCenDepth);
 
                pcl::PointXYZI transform_pos = (pcl::PointXYZI) _transformTobeMapped.pos;
 
@@ -470,9 +468,9 @@ bool BasicLaserMapping::process(Time const& laserOdometryTime)
                      for (int kk = -1; kk <= 1; kk += 2)
                      {
                         pcl::PointXYZI corner;
-                        corner.x = centerX + 25.0f * ii;
-                        corner.y = centerY + 25.0f * jj;
-                        corner.z = centerZ + 25.0f * kk;
+                        corner.x = centerX + CUBE_HALF * ii;
+                        corner.y = centerY + CUBE_HALF * jj;
+                        corner.z = centerZ + CUBE_HALF * kk;
 
                         float squaredSide1 = calcSquaredDiff(transform_pos, corner);
                         float squaredSide2 = calcSquaredDiff(pointOnYAxis, corner);
