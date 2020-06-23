@@ -38,6 +38,7 @@
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_broadcaster.h>
 
+#include "loam_velodyne/IOBoard.h"
 #include "loam_velodyne/BasicTransformMaintenance.h"
 
 namespace loam {
@@ -60,13 +61,15 @@ public:
    *
    * @param laserOdometry the new laser odometry
    */
-  void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry);
+  void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry, IOBoard::Ptr io_board);
 
   /** \brief Handler method for mapping odometry messages.
    *
    * @param odomAftMapped the new mapping odometry
    */
   void odomAftMappedHandler(const nav_msgs::Odometry::ConstPtr& odomAftMapped);
+
+  void process(IOBoard::Ptr io_board);
 
 private:
   nav_msgs::Odometry _laserOdometry2;         ///< latest integrated laser odometry message
@@ -75,8 +78,10 @@ private:
   ros::Publisher _pubLaserOdometry2;          ///< integrated laser odometry publisher
   tf::TransformBroadcaster _tfBroadcaster2;   ///< integrated laser odometry transformation broadcaster
 
+  /*
   ros::Subscriber _subLaserOdometry;    ///< (high frequency) laser odometry subscriber
   ros::Subscriber _subOdomAftMapped;    ///< (low frequency) mapping odometry subscriber
+  */
 };
 
 } // end namespace loam

@@ -144,23 +144,14 @@ namespace loam
     _pubLaserOdometry = node.advertise<nav_msgs::Odometry>("/laser_odom_to_init", 5);
 
     // subscribe to scan registration topics
-    _subCornerPointsSharp = node.subscribe<sensor_msgs::PointCloud2>
-      ("/laser_cloud_sharp", 2, &LaserOdometry::laserCloudSharpHandler, this);
-
-    _subCornerPointsLessSharp = node.subscribe<sensor_msgs::PointCloud2>
-      ("/laser_cloud_less_sharp", 2, &LaserOdometry::laserCloudLessSharpHandler, this);
-
-    _subSurfPointsFlat = node.subscribe<sensor_msgs::PointCloud2>
-      ("/laser_cloud_flat", 2, &LaserOdometry::laserCloudFlatHandler, this);
-
-    _subSurfPointsLessFlat = node.subscribe<sensor_msgs::PointCloud2>
-      ("/laser_cloud_less_flat", 2, &LaserOdometry::laserCloudLessFlatHandler, this);
-
-    _subLaserCloudFullRes = node.subscribe<sensor_msgs::PointCloud2>
-      ("/velodyne_cloud_2", 2, &LaserOdometry::laserCloudFullResHandler, this);
-
-    _subImuTrans = node.subscribe<sensor_msgs::PointCloud2>
-      ("/imu_trans", 5, &LaserOdometry::imuTransHandler, this);
+    /*
+    _subCornerPointsSharp = node.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_sharp", 2, &LaserOdometry::laserCloudSharpHandler, this);
+    _subCornerPointsLessSharp = node.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_less_sharp", 2, &LaserOdometry::laserCloudLessSharpHandler, this);
+    _subSurfPointsFlat = node.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_flat", 2, &LaserOdometry::laserCloudFlatHandler, this);
+    _subSurfPointsLessFlat = node.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_less_flat", 2, &LaserOdometry::laserCloudLessFlatHandler, this);
+    _subLaserCloudFullRes = node.subscribe<sensor_msgs::PointCloud2>("/velodyne_cloud_2", 2, &LaserOdometry::laserCloudFullResHandler, this);
+    _subImuTrans = node.subscribe<sensor_msgs::PointCloud2>("/imu_trans", 5, &LaserOdometry::imuTransHandler, this);
+    */
 
     return true;
   }
@@ -262,7 +253,7 @@ namespace loam
       ros::spinOnce();
 
       // try processing new data
-      process();
+      // process();
 
       status = ros::ok();
       rate.sleep();
@@ -283,18 +274,42 @@ namespace loam
 
 
 
-  void LaserOdometry::process()
+  void LaserOdometry::process(IOBoard::Ptr io_board)
   {
+    if(io_board->laser_cloud_sharp) {
+      laserCloudSharpHandler(io_board->laser_cloud_sharp);
+    }
+
+    if(io_board->laser_cloud_less_sharp) {
+      laserCloudLessSharpHandler(io_board->laser_cloud_less_sharp);
+    }
+
+    if(io_board->laser_cloud_flat) {
+      laserCloudFlatHandler(io_board->laser_cloud_flat);
+    }
+
+    if(io_board->laser_cloud_less_flat) {
+      laserCloudLessFlatHandler(io_board->laser_cloud_less_flat);
+    }
+
+    if(io_board->velodyne_cloud_2) {
+      laserCloudFullResHandler(io_board->velodyne_cloud_2);
+    }
+
+    if(io_board->imu_trans) {
+      imuTransHandler(io_board->imu_trans);
+    }
+
     if (!hasNewData())
       return;// waiting for new data to arrive...
 
     reset();// reset flags, etc.
     BasicLaserOdometry::process();
-    publishResult();
+    publishResult(io_board);
   }
 
 
-  void LaserOdometry::publishResult()
+  void LaserOdometry::publishResult(IOBoard::Ptr io_board)
   {
     // publish odometry transformations
     geometry_msgs::Quaternion geoQuat = tf::createQuaternionMsgFromRollPitchYaw(transformSum().rot_z.rad(),
@@ -309,7 +324,11 @@ namespace loam
     _laserOdometryMsg.pose.pose.position.x    = transformSum().pos.x();
     _laserOdometryMsg.pose.pose.position.y    = transformSum().pos.y();
     _laserOdometryMsg.pose.pose.position.z    = transformSum().pos.z();
-    _pubLaserOdometry.publish(_laserOdometryMsg);
+
+    nav_msgs::Odometry::Ptr odom_msg(new nav_msgs::Odometry());
+    *odom_msg = _laserOdometryMsg;
+    io_board->laser_odom_to_init = odom_msg;
+    _pubLaserOdometry.publish(io_board->laser_odom_to_init);
 
     _laserOdometryTrans.stamp_ = _timeSurfPointsLessFlat;
     _laserOdometryTrans.setRotation(tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));
@@ -320,11 +339,15 @@ namespace loam
     if (_ioRatio < 2 || frameCount() % _ioRatio == 1)
     {
       ros::Time sweepTime = _timeSurfPointsLessFlat;
-      publishCloudMsg(_pubLaserCloudCornerLast, *lastCornerCloud(), sweepTime, "/camera");
-      publishCloudMsg(_pubLaserCloudSurfLast, *lastSurfaceCloud(), sweepTime, "/camera");
+      io_board->laser_cloud_corner_last = pcl2cloud_msg(*lastCornerCloud(), sweepTime, "/camera");
+      _pubLaserCloudCornerLast.publish(io_board->laser_cloud_corner_last);
+
+      io_board->laser_cloud_surf_last = pcl2cloud_msg(*lastSurfaceCloud(), sweepTime, "/camera");
+      _pubLaserCloudSurfLast.publish(io_board->laser_cloud_surf_last);
 
       transformToEnd(laserCloud());  // transform full resolution cloud to sweep end before sending it
-      publishCloudMsg(_pubLaserCloudFullRes, *laserCloud(), sweepTime, "/camera");
+      io_board->velodyne_cloud_3 = pcl2cloud_msg(*laserCloud(), sweepTime, "/camera");
+      _pubLaserCloudFullRes.publish(io_board->velodyne_cloud_3);
     }
   }
 

@@ -52,18 +52,17 @@ bool TransformMaintenance::setup(ros::NodeHandle &node, ros::NodeHandle &private
    _pubLaserOdometry2 = node.advertise<nav_msgs::Odometry>("/integrated_to_init", 5);
 
    // subscribe to laser odometry and mapping odometry topics
-   _subLaserOdometry = node.subscribe<nav_msgs::Odometry>
-      ("/laser_odom_to_init", 5, &TransformMaintenance::laserOdometryHandler, this);
-
-   _subOdomAftMapped = node.subscribe<nav_msgs::Odometry>
-      ("/aft_mapped_to_init", 5, &TransformMaintenance::odomAftMappedHandler, this);
+   /*
+   _subLaserOdometry = node.subscribe<nav_msgs::Odometry>("/laser_odom_to_init", 5, &TransformMaintenance::laserOdometryHandler, this);
+   _subOdomAftMapped = node.subscribe<nav_msgs::Odometry>("/aft_mapped_to_init", 5, &TransformMaintenance::odomAftMappedHandler, this);
+   */
 
    return true;
 }
 
 
 
-void TransformMaintenance::laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry)
+void TransformMaintenance::laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry, IOBoard::Ptr io_board)
 {
    double roll, pitch, yaw;
    geometry_msgs::Quaternion geoQuat = laserOdometry->pose.pose.orientation;
@@ -87,6 +86,10 @@ void TransformMaintenance::laserOdometryHandler(const nav_msgs::Odometry::ConstP
    _laserOdometry2.pose.pose.position.y = transformMapped()[4];
    _laserOdometry2.pose.pose.position.z = transformMapped()[5];
    _pubLaserOdometry2.publish(_laserOdometry2);
+
+   nav_msgs::Odometry::Ptr odom_msg(new nav_msgs::Odometry());
+   *odom_msg = _laserOdometry2;
+   io_board->integrated_to_init = odom_msg;
 
    _laserOdometryTrans2.stamp_ = laserOdometry->header.stamp;
    _laserOdometryTrans2.setRotation(tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));
@@ -112,6 +115,16 @@ void TransformMaintenance::odomAftMappedHandler(const nav_msgs::Odometry::ConstP
       odomAftMapped->twist.twist.linear.x,
       odomAftMapped->twist.twist.linear.y,
       odomAftMapped->twist.twist.linear.z);
+}
+
+void TransformMaintenance::process(IOBoard::Ptr io_board) {
+   if(io_board->laser_odom_to_init) {
+      laserOdometryHandler(io_board->laser_odom_to_init, io_board);
+   }
+
+   if(io_board->aft_mapped_to_init) {
+      odomAftMappedHandler(io_board->aft_mapped_to_init);
+   }
 }
 
 } // end namespace loam

@@ -132,17 +132,16 @@ bool MultiScanRegistration::setupROS(ros::NodeHandle& node, ros::NodeHandle& pri
   }
 
   // subscribe to input cloud topic
-  _subLaserCloud = node.subscribe<sensor_msgs::PointCloud2>
-      ("/multi_scan_points", 2, &MultiScanRegistration::handleCloudMessage, this);
+  // _subLaserCloud = node.subscribe<sensor_msgs::PointCloud2>("/multi_scan_points", 2, &MultiScanRegistration::handleCloudMessage, this);
 
   return true;
 }
 
 
 
-void MultiScanRegistration::handleCloudMessage(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
+void MultiScanRegistration::handleCloudMessage(IOBoard::Ptr io_board)
 {
-  if (_systemDelay > 0) 
+  if (_systemDelay > 0)
   {
     --_systemDelay;
     return;
@@ -150,14 +149,14 @@ void MultiScanRegistration::handleCloudMessage(const sensor_msgs::PointCloud2Con
 
   // fetch new input cloud
   pcl::PointCloud<pcl::PointXYZ> laserCloudIn;
-  pcl::fromROSMsg(*laserCloudMsg, laserCloudIn);
+  pcl::fromROSMsg(*io_board->input_cloud, laserCloudIn);
 
-  process(laserCloudIn, fromROSTime(laserCloudMsg->header.stamp));
+  process(io_board, laserCloudIn, fromROSTime(io_board->input_cloud->header.stamp));
 }
 
 
 
-void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserCloudIn, const Time& scanTime)
+void MultiScanRegistration::process(IOBoard::Ptr io_board, const pcl::PointCloud<pcl::PointXYZ>& laserCloudIn, const Time& scanTime)
 {
   size_t cloudSize = laserCloudIn.size();
 
@@ -175,7 +174,7 @@ void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserC
   pcl::PointXYZI point;
   _laserCloudScans.resize(_scanMapper.getNumberOfScanRings());
   // clear all scanline points
-  std::for_each(_laserCloudScans.begin(), _laserCloudScans.end(), [](auto&&v) {v.clear(); }); 
+  std::for_each(_laserCloudScans.begin(), _laserCloudScans.end(), [](auto&&v) {v.clear(); });
 
   // extract valid points from input cloud
   for (int i = 0; i < cloudSize; i++) {
@@ -234,7 +233,7 @@ void MultiScanRegistration::process(const pcl::PointCloud<pcl::PointXYZ>& laserC
   }
 
   processScanlines(scanTime, _laserCloudScans);
-  publishResult();
+  publishResult(io_board);
 }
 
 } // end namespace loam

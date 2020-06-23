@@ -45,6 +45,7 @@
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
 
+#include "IOBoard.h"
 #include "BasicLaserOdometry.h"
 
 namespace loam
@@ -107,7 +108,7 @@ namespace loam
     void spin();
 
     /** \brief Try to process buffered data. */
-    void process();
+    void process(IOBoard::Ptr io_board);
 
   protected:
     /** \brief Reset flags, etc. */
@@ -117,7 +118,7 @@ namespace loam
     bool hasNewData();
 
     /** \brief Publish the current result via the respective topics. */
-    void publishResult();
+    void publishResult(IOBoard::Ptr io_board);
 
   private:
     uint16_t _ioRatio;       ///< ratio of input to output frames
@@ -145,12 +146,14 @@ namespace loam
     ros::Publisher _pubLaserOdometry;         ///< laser odometry publisher
     tf::TransformBroadcaster _tfBroadcaster;  ///< laser odometry transform broadcaster
 
+    /*
     ros::Subscriber _subCornerPointsSharp;      ///< sharp corner cloud message subscriber
     ros::Subscriber _subCornerPointsLessSharp;  ///< less sharp corner cloud message subscriber
     ros::Subscriber _subSurfPointsFlat;         ///< flat surface cloud message subscriber
     ros::Subscriber _subSurfPointsLessFlat;     ///< less flat surface cloud message subscriber
     ros::Subscriber _subLaserCloudFullRes;      ///< full resolution cloud message subscriber
     ros::Subscriber _subImuTrans;               ///< IMU transformation information message subscriber
+    */
   };
 
 } // end namespace loam

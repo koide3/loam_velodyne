@@ -28,7 +28,7 @@ RegistrationParams::RegistrationParams(const float& scanPeriod_,
 void BasicScanRegistration::processScanlines(const Time& scanTime, std::vector<pcl::PointCloud<pcl::PointXYZI>> const& laserCloudScans)
 {
   // reset internal buffers and set IMU start state based on current scan time
-  reset(scanTime);  
+  reset(scanTime);
 
   // construct sorted full resolution cloud
   size_t cloudSize = 0;

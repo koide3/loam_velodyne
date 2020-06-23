@@ -34,6 +34,7 @@
 #define LOAM_LASERMAPPING_H
 
 
+#include "IOBoard.h"
 #include "BasicLaserMapping.h"
 #include "common.h"
 
@@ -97,7 +98,7 @@ public:
    void spin();
 
    /** \brief Try to process buffered data. */
-   void process();
+   void process(IOBoard::Ptr io_board);
 
 
 protected:
@@ -108,7 +109,7 @@ protected:
    bool hasNewData();
 
    /** \brief Publish the current result via the respective topics. */
-   void publishResult();
+   void publishResult(IOBoard::Ptr io_board);
 
 private:
    ros::Time _timeLaserCloudCornerLast;   ///< time of current last corner cloud
@@ -130,11 +131,13 @@ private:
    ros::Publisher _pubOdomAftMapped;         ///< mapping odometry publisher
    tf::TransformBroadcaster _tfBroadcaster;  ///< mapping odometry transform broadcaster
 
+   /*
    ros::Subscriber _subLaserCloudCornerLast;   ///< last corner cloud message subscriber
    ros::Subscriber _subLaserCloudSurfLast;     ///< last surface cloud message subscriber
    ros::Subscriber _subLaserCloudFullRes;      ///< full resolution cloud message subscriber
    ros::Subscriber _subLaserOdometry;          ///< laser odometry message subscriber
    ros::Subscriber _subImu;                    ///< IMU message subscriber
+   */
 };
 
 } // end namespace loam

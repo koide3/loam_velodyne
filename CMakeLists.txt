@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   nav_msgs
   sensor_msgs
+  rosbag
   roscpp
   rospy
   std_msgs
@@ -34,6 +35,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # add_definitions( -march=native )
 
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 
 add_subdirectory(src/lib)
 
@@ -48,6 +54,10 @@ target_link_libraries(laserMapping ${catkin_LIBRARIES} ${PCL_LIBRARIES} loam )
 
 add_executable(transformMaintenance src/transform_maintenance_node.cpp)
 target_link_libraries(transformMaintenance ${catkin_LIBRARIES} ${PCL_LIBRARIES} loam )
+
+add_executable(loam_offline src/loam_offline.cpp)
+target_link_libraries(loam_offline ${catkin_LIBRARIES} ${PCL_LIBRARIES} loam )
+
 
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)

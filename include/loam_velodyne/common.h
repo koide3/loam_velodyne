@@ -61,6 +61,16 @@ inline void publishCloudMsg(ros::Publisher& publisher,
   publisher.publish(msg);
 }
 
+template <typename PointT>
+inline sensor_msgs::PointCloud2::Ptr pcl2cloud_msg(const pcl::PointCloud<PointT>& cloud,
+                            const ros::Time& stamp,
+                            std::string frameID) {
+  sensor_msgs::PointCloud2::Ptr msg(new sensor_msgs::PointCloud2);
+  pcl::toROSMsg(cloud, *msg);
+  msg->header.stamp = stamp;
+  msg->header.frame_id = frameID;
+  return msg;
+}
 
 // ROS time adapters
 inline Time fromROSTime(ros::Time const& rosTime)

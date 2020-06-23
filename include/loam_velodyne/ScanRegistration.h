@@ -41,8 +41,8 @@
 #include <ros/node_handle.h>
 #include <sensor_msgs/Imu.h>
 
+#include "IOBoard.h"
 #include "BasicScanRegistration.h"
-
 
 namespace loam
 {
@@ -71,7 +71,7 @@ namespace loam
 
   protected:
     /** \brief Publish the current result via the respective topics. */
-    void publishResult();
+    void publishResult(IOBoard::Ptr io_board);
 
   private:
 
@@ -83,6 +83,7 @@ namespace loam
     bool parseParams(const ros::NodeHandle& nh, RegistrationParams& config_out);
 
   private:
+    /*
     ros::Subscriber _subImu;                    ///< IMU message subscriber
     ros::Publisher _pubLaserCloud;              ///< full resolution cloud message publisher
     ros::Publisher _pubCornerPointsSharp;       ///< sharp corner cloud message publisher
@@ -90,6 +91,7 @@ namespace loam
     ros::Publisher _pubSurfPointsFlat;          ///< flat surface cloud message publisher
     ros::Publisher _pubSurfPointsLessFlat;      ///< less flat surface cloud message publisher
     ros::Publisher _pubImuTrans;                ///< IMU transformation message publisher
+    */
   };
 
 } // end namespace loam

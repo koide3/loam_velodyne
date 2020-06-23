@@ -40,7 +40,7 @@ namespace loam {
 
 
 
-bool ScanRegistration::parseParams(const ros::NodeHandle& nh, RegistrationParams& config_out) 
+bool ScanRegistration::parseParams(const ros::NodeHandle& nh, RegistrationParams& config_out)
 {
   bool success = true;
   int iParam = 0;
@@ -146,15 +146,17 @@ bool ScanRegistration::setupROS(ros::NodeHandle& node, ros::NodeHandle& privateN
     return false;
 
   // subscribe to IMU topic
-  _subImu = node.subscribe<sensor_msgs::Imu>("/imu/data", 50, &ScanRegistration::handleIMUMessage, this);
+  // _subImu = node.subscribe<sensor_msgs::Imu>("/imu/data", 50, &ScanRegistration::handleIMUMessage, this);
 
   // advertise scan registration topics
+  /*
   _pubLaserCloud            = node.advertise<sensor_msgs::PointCloud2>("/velodyne_cloud_2", 2);
   _pubCornerPointsSharp     = node.advertise<sensor_msgs::PointCloud2>("/laser_cloud_sharp", 2);
   _pubCornerPointsLessSharp = node.advertise<sensor_msgs::PointCloud2>("/laser_cloud_less_sharp", 2);
   _pubSurfPointsFlat        = node.advertise<sensor_msgs::PointCloud2>("/laser_cloud_flat", 2);
   _pubSurfPointsLessFlat    = node.advertise<sensor_msgs::PointCloud2>("/laser_cloud_less_flat", 2);
   _pubImuTrans              = node.advertise<sensor_msgs::PointCloud2>("/imu_trans", 5);
+  */
 
   return true;
 }
@@ -184,18 +186,19 @@ void ScanRegistration::handleIMUMessage(const sensor_msgs::Imu::ConstPtr& imuIn)
 }
 
 
-void ScanRegistration::publishResult()
+void ScanRegistration::publishResult(IOBoard::Ptr io_board)
 {
   auto sweepStartTime = toROSTime(sweepStart());
+
   // publish full resolution and feature point clouds
-  publishCloudMsg(_pubLaserCloud, laserCloud(), sweepStartTime, "/camera");
-  publishCloudMsg(_pubCornerPointsSharp, cornerPointsSharp(), sweepStartTime, "/camera");
-  publishCloudMsg(_pubCornerPointsLessSharp, cornerPointsLessSharp(), sweepStartTime, "/camera");
-  publishCloudMsg(_pubSurfPointsFlat, surfacePointsFlat(), sweepStartTime, "/camera");
-  publishCloudMsg(_pubSurfPointsLessFlat, surfacePointsLessFlat(), sweepStartTime, "/camera");
+  io_board->velodyne_cloud_2 = pcl2cloud_msg(laserCloud(), sweepStartTime, "/camera");
+  io_board->laser_cloud_sharp = pcl2cloud_msg(cornerPointsSharp(), sweepStartTime, "/camera");
+  io_board->laser_cloud_less_sharp = pcl2cloud_msg(cornerPointsLessSharp(), sweepStartTime, "/camera");
+  io_board->laser_cloud_flat = pcl2cloud_msg(surfacePointsFlat(), sweepStartTime, "/camera");
+  io_board->laser_cloud_less_flat = pcl2cloud_msg(surfacePointsLessFlat(), sweepStartTime, "/camera");
 
   // publish corresponding IMU transformation information
-  publishCloudMsg(_pubImuTrans, imuTransform(), sweepStartTime, "/camera");
+  io_board->imu_trans = pcl2cloud_msg(imuTransform(), sweepStartTime, "/camera");
 }
 
 } // end namespace loam

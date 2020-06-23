@@ -34,6 +34,7 @@
 #define LOAM_MULTISCANREGISTRATION_H
 
 
+#include "loam_velodyne/IOBoard.h"
 #include "loam_velodyne/ScanRegistration.h"
 
 #include <sensor_msgs/PointCloud2.h>
@@ -112,7 +113,7 @@ public:
    *
    * @param laserCloudMsg the new input cloud message to process
    */
-  void handleCloudMessage(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg);
+  void handleCloudMessage(IOBoard::Ptr io_board);
 
 private:
   /** \brief Setup component in active mode.
@@ -127,13 +128,13 @@ private:
    * @param laserCloudIn the new input cloud to process
    * @param scanTime the scan (message) timestamp
    */
-  void process(const pcl::PointCloud<pcl::PointXYZ>& laserCloudIn, const Time& scanTime);
+  void process(IOBoard::Ptr io_board, const pcl::PointCloud<pcl::PointXYZ>& laserCloudIn, const Time& scanTime);
 
 private:
   int _systemDelay = 20;             ///< system startup delay counter
   MultiScanMapper _scanMapper;  ///< mapper for mapping vertical point angles to scan ring IDs
   std::vector<pcl::PointCloud<pcl::PointXYZI> > _laserCloudScans;
-  ros::Subscriber _subLaserCloud;   ///< input cloud message subscriber
+  // ros::Subscriber _subLaserCloud;   ///< input cloud message subscriber
 
 };
 
