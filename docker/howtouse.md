@@ -10,7 +10,7 @@ cd loam/docker
 
 ## Run
 
-On host:
+### On host:
 ```bash
 roscore
 ```
@@ -26,7 +26,7 @@ rosbag play --clock nsh_indoor_outdoor.bag
 nsh_indoor_outdoor.bag: https://drive.google.com/file/d/1s05tBQOLNEDDurlg48KiUWxCp-YqYyGH/view
 
 
-On docker image:
+### On docker image:
 ```bash
 cd loam/docker
 ./run.sh
