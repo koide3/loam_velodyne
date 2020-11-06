@@ -33,3 +33,6 @@ cd loam/docker
 
 roslaunch loam_velodyne loam_velodyne.launch
 ```
+
+![loam](https://user-images.githubusercontent.com/31344317/98347880-5da2df80-205b-11eb-8aae-abfd8fc67f70.gif)
+
